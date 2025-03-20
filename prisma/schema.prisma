@@ -20,3 +20,19 @@ model User {
   password  String?
   createdAt DateTime @default(now())
 }
+
+
+model Profile {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+}
+
+model car_overview {
+  id Int @id @default(autoincrement())
+  year Int
+  car String
+  total_car Int
+}
