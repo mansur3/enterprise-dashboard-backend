@@ -3,6 +3,8 @@ const router = express.Router();
 
 const salesController = require("../controllers/sales.controller");
 
-router.get("/sales", salesController.getAllData);
+const authMiddleware = require("../middlewares/auth.middleware");
+
+router.get("/sales", authMiddleware, salesController.getAllData);
 
 module.exports = router;

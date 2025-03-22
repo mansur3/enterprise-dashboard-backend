@@ -31,11 +31,35 @@ exports.getUserById = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   const { name, email } = req.body;
+
   try {
     const user = await prisma.user.create({
       data: {
         name,
         email,
+      },
+    });
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id }, // Make sure this userId exists
+    });
+
+    if (!userData) {
+      console.log("User does not exist!");
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { id: req.user.id }, // Make sure this profileId exists
+    });
+
+    if (!profile) {
+      console.log("Profile does not exist!");
+    }
+    await prisma.user_activity.create({
+      data: {
+        // userId: user?.id ?? null,
+        // profileId: req?.user?.id ?? null,
+        username: user.name,
+        activity: "Created new user.",
       },
     });
     return res.status(201).send({
@@ -50,6 +74,7 @@ exports.createUser = async (req, res) => {
 exports.updateUserById = async (req, res) => {
   const { id } = req.params;
   const { name, email, password } = req.body;
+
   try {
     const user = await prisma.user.update({
       where: {
@@ -59,6 +84,14 @@ exports.updateUserById = async (req, res) => {
         name,
         email,
         password,
+      },
+    });
+    await prisma.user_activity.create({
+      data: {
+        // userId: req.user.id,
+        // profileId: user.id,
+        username: req.user.name,
+        activity: "Updated user.",
       },
     });
     return res.status(200).send({
@@ -73,9 +106,18 @@ exports.updateUserById = async (req, res) => {
 exports.deleteUserById = async (req, res) => {
   const { id } = req.params;
   try {
-    await prisma.user.delete({
+    const user = await prisma.user.delete({
       where: {
         id: parseInt(id),
+      },
+    });
+
+    await prisma.user_activity.create({
+      data: {
+        // userId: req.user.id,
+        // profileId: user.id,
+        username: req.user?.name ?? "deleted user",
+        activity: "Deleted user",
       },
     });
     return res.status(204).send();
