@@ -66,6 +66,15 @@ exports.getUserByUserAndPassword = async (req, res) => {
 exports.createUser = async (req, res) => {
   const { name, email, password } = req.body;
   try {
+    const userData = await prisma.profile.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (userData) {
+      return res.status(400).send({ message: "User already exists" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.profile.create({
       data: {
@@ -84,7 +93,7 @@ exports.createUser = async (req, res) => {
         // userId: user.id,
         username: user.name,
         activity: "Sign up",
-        Profile: user.id,
+        // Profile: user.id,
       },
     });
     return res.status(201).send({
